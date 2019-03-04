@@ -1,0 +1,21 @@
+# --- Backup Scripts ---
+# Change Destination and Source to Current Places.
+# The script will Copy over Source and Add a Weekday Timestamp after the name in Destination.
+
+# --- Variables ---
+$TimeStamp = Get-Date -UFormat %A
+$Source = "D:\Source"
+$Destination = "\\Destination" + "_" + $TimeStamp
+
+# --- Copies Files ---
+# From Source to Destination.
+# Generates a migration log to D:\Backup_Logs
+New-Item -ItemType directory -Path $Destination -Force
+Copy-Item -Path $Source\*.* -Destination $Destination -Force
+ROBOCOPY "$Source" "$Destination" /E > D:\Backup_Logs\Source_Backup.log
+
+# --- Waiting with scripts for 1 hour ---
+Start-Sleep -s 3600
+
+# ---Mail the Backup.log---
+Send-MailMessage -From "User1@Mail.se" -To "User2@Mail.se" -Subject "Backup Done: Destination" -Body "Internal Backup for Source is Done. See the attachment for more information!" -Attachments D:\Backup_Logs\Source_Backup.log -Priority High -SmtpServer "smtp.office365.com"
